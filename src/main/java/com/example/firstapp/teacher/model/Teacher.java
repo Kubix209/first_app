@@ -2,6 +2,7 @@ package com.example.firstapp.teacher.model;
 
 import com.example.firstapp.common.Language;
 import com.example.firstapp.student.model.Student;
+import com.mysql.cj.x.protobuf.MysqlxCursor;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,7 +26,7 @@ public class Teacher {
     @CollectionTable(name = "teacher_language")
     @Column(name = "language")
     private Set<Language> languages;
-    @OneToMany(mappedBy = "teacher")
+    @OneToMany(mappedBy = "teacher", fetch = FetchType.EAGER)
     private Set<Student> students;
 
     @Override

@@ -1,9 +1,10 @@
 package com.example.firstapp.teacher;
 
 import com.example.firstapp.common.Language;
+import com.example.firstapp.teacher.dto.TeacherDto;
 import com.example.firstapp.teacher.model.Teacher;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,10 +28,16 @@ public class TeacherService {
     }
 
     public Teacher findById(Long id) {
-        return teacherRepository.findById(id).orElseThrow(() -> new RuntimeException("teacher with Id " + id + " not found"));
+        return teacherRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + id + " not found"));
     }
 
-    public List<Teacher> findAllByLanguage(Language language) {
-       return teacherRepository.findAllByLanguagesContaining(language);
+    public List<TeacherDto> findAllByLanguage(Language language) {
+      return teacherRepository.findAllByLanguagesContaining(language).stream()
+                .map(teacher -> new TeacherDto(
+                        teacher.getId(),
+                        teacher.getFirstName(),
+                        teacher.getLastName()
+                ))
+                .toList();
     }
 }
