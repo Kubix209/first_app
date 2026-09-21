@@ -37,7 +37,7 @@
         background-color: #f5f5f5;
     }
 
-    .add-btn, .edit-btn, .delete-btn {
+    .add-btn, .edit-btn, .change-date-btn, .delete-btn {
         display: inline-block;
         color: white;
         padding: 8px 16px;
@@ -65,6 +65,15 @@
 
     .edit-btn:hover {
         background-color: #1976D2;
+    }
+
+    .change-date-btn {
+        background-color: #FF9800;
+        margin-right: 8px;
+    }
+
+    .change-date-btn:hover {
+        background-color: #F57C00;
     }
 
     .delete-btn {
@@ -118,18 +127,18 @@
     <td th:text="${lesson.id}"></td>
 
     <td th:text="${lesson.teacher != null
-                ? lesson.teacher.firstName + ' ' + lesson.teacher.lastName
-                : 'Brak nauczyciela'}">
+                    ? lesson.teacher.firstName + ' ' + lesson.teacher.lastName
+                    : 'Brak nauczyciela'}">
     </td>
 
     <td th:text="${lesson.student != null
-                ? lesson.student.firstName + ' ' + lesson.student.lastName
-                : 'Brak studenta'}">
+                    ? lesson.student.firstName + ' ' + lesson.student.lastName
+                    : 'Brak studenta'}">
     </td>
 
     <td th:text="${lesson.dateTime != null
-                ? #temporals.format(lesson.dateTime, 'dd.MM.yyyy HH:mm')
-                : 'Brak terminu'}">
+                    ? #temporals.format(lesson.dateTime, 'dd.MM.yyyy HH:mm')
+                    : 'Brak terminu'}">
     </td>
 
     <td>
@@ -138,7 +147,13 @@
         Edytuj
       </a>
 
-      <button type="button" class="delete-btn"
+      <a class="change-date-btn"
+         th:href="@{/lessons/{id}/change-date-time(id=${lesson.id})}">
+        Zmień termin
+      </a>
+
+      <button type="button"
+              class="delete-btn"
               th:onclick="'deleteLesson(' + ${lesson.id} + ')'">
         Usuń
       </button>

@@ -2,12 +2,14 @@ package com.example.firstapp.lesson;
 
 import com.example.firstapp.lesson.model.Lesson;
 import com.example.firstapp.student.StudentService;
-import com.example.firstapp.student.model.Student;
 import com.example.firstapp.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/lessons")
@@ -37,8 +39,8 @@ public class LessonController {
     }
 
     @PostMapping("/create")
-    public String save(Lesson lesson, @RequestParam Long studentId, @RequestParam Long teacherId) {
-        lessonService.save(lesson, studentId, teacherId);
+    public String create(Lesson lesson, @RequestParam Long studentId, @RequestParam Long teacherId) {
+        lessonService.create(lesson, studentId, teacherId);
         return "redirect:/lessons";
     }
 
@@ -53,10 +55,21 @@ public class LessonController {
 
     @PostMapping("/{id}/edit")
     public String update(@PathVariable Long id, Lesson lesson, @RequestParam Long studentId, @RequestParam Long teacherId) {
-        lesson.setId(id);
-        lessonService.save(lesson, studentId, teacherId);
+        lessonService.update(id, lesson, studentId, teacherId);
         return "redirect:/lessons";
     }
 
+    @GetMapping("/{id}/change-date-time")
+    public String changeDateTimeForm(@PathVariable Long id, Model model) {
+        Lesson lesson = lessonService.findById(id);
+        model.addAttribute("lesson", lesson);
+        return "lessons/change-date-time";
+    }
+
+    @PostMapping("/{id}/change-date-time")
+    public String changeDateTime(@PathVariable Long id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime) {
+        lessonService.changeDateTime(id, dateTime);
+        return "redirect:/lessons";
+    }
 
 }

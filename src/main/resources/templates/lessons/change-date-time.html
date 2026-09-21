@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Zmiana terminu lekcji</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+        }
+
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+        }
+
+        .lesson-info {
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #FF9800;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background-color: #388E3C;
+        }
+
+        .btn-secondary {
+            background-color: #9E9E9E;
+        }
+
+        .btn-secondary:hover {
+            background-color: #757575;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="nav">
+    <a href="/students">📚 Studenci</a>
+    <a href="/teachers">👨‍🏫 Nauczyciele</a>
+    <a href="/lessons">📅 Lekcje</a>
+</div>
+
+<h1>📅 Zmiana terminu lekcji</h1>
+
+<div class="form-container">
+    <div class="lesson-info">
+        <p>
+            <strong>Lekcja nr:</strong>
+            <span th:text="${lesson.id}"></span>
+        </p>
+
+        <p>
+            <strong>Nauczyciel:</strong>
+            <span th:text="${lesson.teacher != null
+                ? lesson.teacher.firstName + ' ' + lesson.teacher.lastName
+                : 'Brak nauczyciela'}"></span>
+        </p>
+
+        <p>
+            <strong>Student:</strong>
+            <span th:text="${lesson.student != null
+                ? lesson.student.firstName + ' ' + lesson.student.lastName
+                : 'Brak studenta'}"></span>
+        </p>
+
+        <p>
+            <strong>Obecny termin:</strong>
+            <span th:text="${lesson.dateTime != null
+                ? #temporals.format(lesson.dateTime, 'dd.MM.yyyy HH:mm')
+                : 'Brak terminu'}"></span>
+        </p>
+    </div>
+
+    <form th:action="@{/lessons/{id}/change-date-time(id=${lesson.id})}"
+          method="post">
+
+        <div class="form-group">
+            <label for="dateTime">Nowa data i godzina:</label>
+            <input type="datetime-local"
+                   id="dateTime"
+                   name="dateTime"
+                   th:value="${lesson.dateTime != null
+                       ? #temporals.format(lesson.dateTime, 'yyyy-MM-dd''T''HH:mm')
+                       : ''}"
+                   required>
+        </div>
+
+        <button type="submit" class="btn">Zapisz termin</button>
+        <a th:href="@{/lessons}" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>
+
+</body>
+</html>

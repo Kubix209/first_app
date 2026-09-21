@@ -10,4 +10,6 @@ import java.time.LocalDateTime;
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
     boolean existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(Teacher teacher, LocalDateTime from, LocalDateTime to);
+
+    boolean existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(Teacher teacher, LocalDateTime from, LocalDateTime to, Long id);
 }
