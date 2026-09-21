@@ -1,6 +1,7 @@
 package com.example.firstapp.teacher;
 
 import com.example.firstapp.common.Language;
+import com.example.firstapp.teacher.dto.TeacherDto;
 import com.example.firstapp.teacher.model.Teacher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -57,7 +58,7 @@ public class TeacherController {
 
     @GetMapping(params = "language")
     @ResponseBody
-    public List<Teacher> findByLanguage(@RequestParam Language language) {
+    public List<TeacherDto> findByLanguage(@RequestParam Language language) {
         return teacherService.findAllByLanguage(language);
     }
 

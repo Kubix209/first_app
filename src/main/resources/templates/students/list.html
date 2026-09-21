@@ -15,6 +15,21 @@
             color: #333;
         }
 
+        .nav {
+            margin-bottom: 20px;
+        }
+
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -33,18 +48,18 @@
             color: white;
         }
 
-        tr:hover {
+        tbody tr:hover {
             background-color: #f5f5f5;
         }
 
-        .add-btn, .edit-btn, .delete-btn {
+        .btn {
             display: inline-block;
             color: white;
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
-            font-size: 14px;
             font-family: inherit;
+            font-size: 14px;
             text-decoration: none;
             cursor: pointer;
         }
@@ -55,16 +70,23 @@
         }
 
         .add-btn:hover {
-            background-color: #388E3C;
+            background-color: #45a049;
         }
 
         .edit-btn {
             background-color: #2196F3;
-            margin-right: 8px;
         }
 
         .edit-btn:hover {
             background-color: #1976D2;
+        }
+
+        .change-teacher-btn {
+            background-color: #FF9800;
+        }
+
+        .change-teacher-btn:hover {
+            background-color: #F57C00;
         }
 
         .delete-btn {
@@ -75,15 +97,10 @@
             background-color: #da190b;
         }
 
-        .nav {
-            margin-bottom: 20px;
-        }
-
-        .nav a {
-            margin-right: 15px;
-            text-decoration: none;
-            color: #2196F3;
-            font-weight: bold;
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
     </style>
 </head>
@@ -98,42 +115,58 @@
 
 <h1>📚 Lista Studentów</h1>
 
-<a class="add-btn" th:href="@{/students/create}">
+<a th:href="@{/students/create}" class="btn add-btn">
     ➕ Dodaj studenta
 </a>
 
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Imię</th>
-        <th>Nazwisko</th>
-        <th>Język</th>
-        <th>Akcje</th>
-    </tr>
-    </thead>
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>Język</th>
+            <th>Nauczyciel</th>
+            <th>Akcje</th>
+        </tr>
+        </thead>
 
-    <tbody>
-    <tr th:each="student : ${students}">
-        <td th:text="${student.id}"></td>
-        <td th:text="${student.firstName}"></td>
-        <td th:text="${student.lastName}"></td>
-        <td th:text="${student.language}"></td>
+        <tbody>
+        <tr th:each="student : ${students}">
+            <td th:text="${student.id}"></td>
+            <td th:text="${student.firstName}"></td>
+            <td th:text="${student.lastName}"></td>
+            <td th:text="${student.language}"></td>
 
-        <td>
-            <a class="edit-btn"
-               th:href="@{/students/{id}/edit(id=${student.id})}">
-                Edytuj
-            </a>
+            <td th:text="${student.teacher != null
+                    ? student.teacher.firstName + ' ' + student.teacher.lastName
+                    : 'Brak nauczyciela'}">
+            </td>
 
-            <button type="button" class="delete-btn"
-                    th:onclick="'deleteStudent(' + ${student.id} + ')'">
-                Usuń
-            </button>
-        </td>
-    </tr>
-    </tbody>
-</table>
+            <td>
+                <div class="actions">
+                    <a th:href="@{/students/{id}/edit(id=${student.id})}"
+                       class="btn edit-btn">
+                        ✏️ Edytuj
+                    </a>
+
+                    <a th:href="@{/students/{id}/change-teacher(id=${student.id})}"
+                       class="btn change-teacher-btn">
+                        👨‍🏫 Zmień nauczyciela
+                    </a>
+
+                    <button type="button"
+                            class="btn delete-btn"
+                            th:onclick="'deleteStudent(' + ${student.id} + ')'">
+                        Usuń
+                    </button>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
 <script>
     async function deleteStudent(id) {

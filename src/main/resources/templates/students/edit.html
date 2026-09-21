@@ -1,3 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edycja Studenta</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background: #f5f5f5;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+        }
+
+        .nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #2196F3;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="nav">
+    <a href="/students">📚 Studenci</a>
+    <a href="/teachers">👨‍🏫 Nauczyciele</a>
+    <a href="/lessons">📅 Lekcje</a>
+</div>
+
+<h1>✏️ Edycja Studenta</h1>
+
 <form th:action="@{/students/{id}/edit(id=${student.id})}" method="post">
     <div class="form-group">
         <label for="firstName">Imię:</label>
@@ -14,6 +82,10 @@
     <div class="form-group">
         <label for="language">Język programowania:</label>
         <select id="language" name="language" required>
+            <option value="" th:selected="${student.language == null}">
+                -- Wybierz język --
+            </option>
+
             <option th:each="lang : ${languages}"
                     th:value="${lang}"
                     th:text="${lang}"
@@ -24,16 +96,111 @@
 
     <div class="form-group">
         <label for="teacherId">Nauczyciel:</label>
-        <select id="teacherId" name="teacherId" required>
-            <option value="">-- Wybierz nauczyciela --</option>
-            <option th:each="teacher : ${teachers}"
-                    th:value="${teacher.id}"
-                    th:text="${teacher.firstName + ' ' + teacher.lastName + ' ' + teacher.languages}"
-                    th:selected="${student.teacher != null and teacher.id == student.teacher.id}">
-            </option>
+        <select id="teacherId" name="teacherId" required disabled
+                th:attr="data-current-teacher-id=${student.teacher != null
+                    ? student.teacher.id : ''}">
+            <option value="">-- Ładowanie nauczycieli --</option>
         </select>
     </div>
 
-    <button type="submit" class="btn">💾 Zapisz zmiany</button>
-    <a href="/students" style="margin-left:10px;">Anuluj</a>
+    <button type="submit" id="saveButton" class="btn" disabled>
+        💾 Zapisz zmiany
+    </button>
+
+    <a th:href="@{/students}" style="margin-left: 10px;">Anuluj</a>
 </form>
+
+<script>
+    const languageSelect = document.getElementById('language');
+    const teacherSelect = document.getElementById('teacherId');
+    const saveButton = document.getElementById('saveButton');
+
+    let latestRequestId = 0;
+
+    async function populateTeachers(selectedTeacherId = '') {
+        const requestId = ++latestRequestId;
+        const language = languageSelect.value;
+
+        teacherSelect.disabled = true;
+        saveButton.disabled = true;
+        teacherSelect.replaceChildren(
+            new Option('-- Najpierw wybierz język --', '')
+        );
+
+        if (!language) {
+            return;
+        }
+
+        teacherSelect.replaceChildren(
+            new Option('-- Ładowanie nauczycieli --', '')
+        );
+
+        try {
+            const response = await fetch(
+                `/teachers?language=${encodeURIComponent(language)}`
+            );
+
+            if (!response.ok) {
+                throw new Error('Nie udało się pobrać nauczycieli');
+            }
+
+            const teachers = await response.json();
+
+            // Pomijamy odpowiedź, jeśli użytkownik zmienił już język.
+            if (requestId !== latestRequestId) {
+                return;
+            }
+
+            if (teachers.length === 0) {
+                teacherSelect.replaceChildren(
+                    new Option('-- Brak nauczycieli dla tego języka --', '')
+                );
+                return;
+            }
+
+            teacherSelect.replaceChildren(
+                new Option('-- Wybierz nauczyciela --', '')
+            );
+
+            teachers.forEach(teacher => {
+                const option = new Option(
+                    `${teacher.firstName} ${teacher.lastName}`,
+                    teacher.id
+                );
+
+                // Przy otwarciu formularza zaznaczamy obecnego nauczyciela.
+                if (String(teacher.id) === String(selectedTeacherId)) {
+                    option.selected = true;
+                }
+
+                teacherSelect.add(option);
+            });
+
+            teacherSelect.disabled = false;
+            saveButton.disabled = !teacherSelect.value;
+        } catch (error) {
+            if (requestId !== latestRequestId) {
+                return;
+            }
+
+            teacherSelect.replaceChildren(
+                new Option('-- Błąd pobierania. Wybierz język ponownie --', '')
+            );
+        }
+    }
+
+    // Zmiana języka usuwa poprzedni wybór nauczyciela.
+    languageSelect.addEventListener('change', function () {
+        populateTeachers();
+    });
+
+    teacherSelect.addEventListener('change', function () {
+        saveButton.disabled = !teacherSelect.value;
+    });
+
+    // Przy otwarciu strony pobieramy nauczycieli dla aktualnego języka.
+    populateTeachers(teacherSelect.dataset.currentTeacherId || '');
+</script>
+
+</body>
+</html>

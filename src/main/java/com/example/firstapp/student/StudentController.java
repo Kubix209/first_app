@@ -57,4 +57,18 @@ public class StudentController {
         return "redirect:/students";
     }
 
+    @GetMapping("/{id}/change-teacher")
+    public String changeTeacherForm(@PathVariable Long id, Model model) {
+        Student student = studentService.findById(id);
+        model.addAttribute("student", student);
+        model.addAttribute("teachers", teacherService.findAllByLanguage(student.getLanguage()));
+        return "students/change-teacher";
+    }
+
+    @PostMapping("/{id}/change-teacher")
+    public String changeTeacher(@PathVariable Long id, @RequestParam Long teacherId) {
+        studentService.changeTeacher(id, teacherId);
+        return "redirect:/students";
+    }
+
 }
