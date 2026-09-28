@@ -56,6 +56,8 @@ public class TeacherController {
         return "redirect:/teachers";
     }
 
+    //endpoint GET zwracający JSON, z parametrem zapytania(query parameter)
+    //http://localhost:8080/teachers?language=JAVA
     @GetMapping(params = "language")
     @ResponseBody
     public List<TeacherDto> findByLanguage(@RequestParam Language language) {
