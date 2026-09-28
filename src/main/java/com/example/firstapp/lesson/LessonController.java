@@ -40,7 +40,7 @@ public class LessonController {
 
     @PostMapping("/create")
     public String create(Lesson lesson, @RequestParam Long studentId, @RequestParam Long teacherId) {
-        lessonService.create(lesson, studentId, teacherId);
+        lessonService.save(lesson, studentId, teacherId);
         return "redirect:/lessons";
     }
 

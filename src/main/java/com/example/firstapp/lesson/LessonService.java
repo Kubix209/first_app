@@ -31,7 +31,7 @@ public class LessonService {
         lessonRepository.deleteById(id);
     }
 
-    public void create(Lesson lesson, Long studentId, Long teacherId) {
+    public void save(Lesson lesson, Long studentId, Long teacherId) {
         if (lesson == null || lesson.getDateTime() == null || studentId == null || teacherId == null) {
             throw new IllegalArgumentException("Lesson data is missing");
         }
@@ -113,11 +113,11 @@ public class LessonService {
             throw new IllegalArgumentException("Lesson id or date and time are missing");
         }
 
-        Lesson existingLesson = lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Lesson with id " + id + " not found"));
-
         if (dateTime.isBefore(LocalDateTime.now())) {
             throw new LessonInPastException("Lesson cannot be scheduled in past");
         }
+
+        Lesson existingLesson = lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Lesson with id " + id + " not found"));
 
         LocalDateTime from = dateTime.minusHours(1);
         LocalDateTime to = dateTime.plusHours(1);
