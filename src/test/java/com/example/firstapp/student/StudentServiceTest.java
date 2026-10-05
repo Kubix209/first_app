@@ -1,9 +1,11 @@
 package com.example.firstapp.student;
 
 import com.example.firstapp.common.Language;
+import com.example.firstapp.common.exception.LanguageMismatchException;
 import com.example.firstapp.student.model.Student;
 import com.example.firstapp.teacher.TeacherRepository;
 import com.example.firstapp.teacher.model.Teacher;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,8 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 
@@ -137,6 +139,94 @@ public class StudentServiceTest {
         assertEquals(1L, result.getId());
         assertEquals(teacher.getId(), result.getTeacher().getId());
     }
+
+    @Test
+    void testChangeTeacher_studentIdMissing_IllegalArgumentException() {
+        Long teacherId = 1L;
+
+        assertThrows(IllegalArgumentException.class,
+                () -> studentService.changeTeacher(null, teacherId));
+        verify(studentRepository, never()).save(any());
+    }
+
+    @Test
+    void testChangeTeacher_StudentLanguageMissing_IllegalArgumentException() {
+        Student student = Student.builder()
+                .id(1L)
+                .build();
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .languages(Set.of(Language.KOTLIN))
+                .build();
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> studentService.changeTeacher(student.getId(), teacher.getId()));
+        verify(studentRepository, never()).save(any());
+    }
+
+    @Test
+    void testChangeTeacher_LanguageMismatchException() {
+        Teacher teacher = Teacher.builder()
+                .id(2L)
+                .languages(Set.of(Language.KOTLIN))
+                .build();
+
+        Student student = Student.builder()
+                .id(1L)
+                .language(Language.JAVA)
+                .teacher(new Teacher())
+                .build();
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+
+        assertThrows(LanguageMismatchException.class,
+                () -> studentService.changeTeacher(student.getId(), teacher.getId()));
+        verify(studentRepository, never()).save(any());
+    }
+
+    @Test
+    void testChangeTeacher_TeacherAlreadyAssigned_IllegalArgumentException() {
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .languages(Set.of(Language.JAVA))
+                .build();
+        Student student = Student.builder()
+                .id(1L)
+                .language(Language.JAVA)
+                .teacher(teacher)
+                .build();
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> studentService.changeTeacher(student.getId(), teacher.getId()));
+        verify(studentRepository, never()).save(any());
+    }
+
+    @Test
+    void testFindById_StudentNotFound_EntityNotFoundException() {
+        Long id = 1L;
+        when(studentRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> studentService.findById(id));
+        verify(studentRepository).findById(id);
+    }
+
+    @Test
+    void testSave_TeacherNotFound_EntityNotFoundException() {
+        Long id = 1L;
+        when(teacherRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> studentService.save(new Student(), id));
+        verify(studentRepository, never()).save(any());
+    }
+
+
+    
 
 
 }

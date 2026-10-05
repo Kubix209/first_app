@@ -3,6 +3,7 @@ package com.example.firstapp.teacher;
 import com.example.firstapp.common.Language;
 import com.example.firstapp.teacher.dto.TeacherDto;
 import com.example.firstapp.teacher.model.Teacher;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -111,5 +113,15 @@ public class TeacherServiceTest {
         assertEquals(teacher.getFirstName(), result.firstName());
         assertEquals(teacher.getLastName(), result.lastName());
         verify(teacherRepository).findAllByLanguagesContaining(Language.JAVA);
+    }
+
+    @Test
+    void testFindById_TeacherNotFound_EntityNotFoundException() {
+        Long id = 1L;
+        when(teacherRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> teacherService.findById(id));
+        verify(teacherRepository).findById(id);
     }
 }

@@ -1,6 +1,9 @@
 package com.example.firstapp.lesson;
 
 import com.example.firstapp.common.Language;
+import com.example.firstapp.common.exception.LanguageMismatchException;
+import com.example.firstapp.common.exception.LessonDateUnavailableException;
+import com.example.firstapp.common.exception.LessonInPastException;
 import com.example.firstapp.lesson.model.Lesson;
 import com.example.firstapp.student.StudentRepository;
 import com.example.firstapp.student.model.Student;
@@ -20,9 +23,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 
@@ -182,6 +185,254 @@ public class LessonServiceTest {
         Lesson result = lessonCaptor.getValue();
         assertEquals(1L, result.getId());
         assertEquals(lesson.getDateTime(), result.getDateTime());
+    }
+
+    @Test
+    void testSave_MissingData_IllegalArgumentException() {
+        Lesson lesson = new Lesson();
+
+        Student student = Student.builder()
+                .id(1L)
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .build();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> lessonService.save(lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testSave_DateUnavailable_LessonInPastException() {
+        Student student = Student.builder()
+                .id(1L)
+                .language(Language.JAVA)
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .languages(Set.of(Language.KOTLIN))
+                .build();
+
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().minusDays(1))
+                .build();
+
+        assertThrows(LessonInPastException.class, () -> lessonService.save(lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testSave_LessonIdProvided_IllegalArgumentException() {
+        Lesson lesson = Lesson.builder()
+                .id(1L)
+                .dateTime(LocalDateTime.now().plusHours(1))
+                .build();
+
+        Long studentId = 1L;
+        Long teacherId = 1L;
+
+        assertThrows(IllegalArgumentException.class,
+                () -> lessonService.save(lesson, studentId, teacherId));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testSave_TermUnavailable_LessonDateUnavailableException() {
+        Student student = Student.builder()
+                .id(1L)
+                .language(Language.JAVA)
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .languages(Set.of(Language.JAVA, Language.KOTLIN))
+                .build();
+
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().plusHours(1))
+                .build();
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(any(), any(), any())).thenReturn(true);
+
+        assertThrows(LessonDateUnavailableException.class,
+                () -> lessonService.save(lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testSave_StudentLanguageMissing_IllegalArgumentException() {
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().plusHours(1))
+                .build();
+
+        Student student = Student.builder()
+                .id(1L)
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .languages(Set.of(Language.JAVA))
+                .build();
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(any(), any(), any())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> lessonService.save(lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testSave_LanguageMismatchException() {
+        Student student = Student.builder()
+                .id(1L)
+                .language(Language.JAVA)
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .languages(Set.of(Language.KOTLIN))
+                .build();
+
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().plusHours(1))
+                .build();
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(any(), any(), any())).thenReturn(false);
+
+        assertThrows(LanguageMismatchException.class,
+                () -> lessonService.save(lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdate_IdMissing_IllegalArgumentException() {
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().plusHours(1))
+                .build();
+
+        Long studentId = 1L;
+        Long teacherId = 1L;
+
+        assertThrows(IllegalArgumentException.class,
+                () -> lessonService.update(null, lesson, studentId, teacherId));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdate_DateInPast_LessonInPastException() {
+        Long id = 1L;
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().minusDays(1))
+                .build();
+        Long studentId = 1L;
+        Long teacherId = 1L;
+        when(lessonRepository.findById(id)).thenReturn(Optional.of(new Lesson()));
+
+        assertThrows(LessonInPastException.class,
+                () -> lessonService.update(id, lesson, studentId, teacherId));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdate_TermUnavailable_LessonDateUnavailableException() {
+        Long id = 1L;
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().plusDays(1))
+                .build();
+
+        Student student = Student.builder()
+                .id(1L)
+                .build();
+
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .build();
+        when(lessonRepository.findById(id)).thenReturn(Optional.of(new Lesson()));
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(true);
+
+        assertThrows(LessonDateUnavailableException.class,
+                () -> lessonService.update(id, lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdate_TeacherLanguageIsMissing_IllegalArgumentException() {
+        Long id = 1L;
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().plusHours(1))
+                .build();
+        Student student = Student.builder()
+                .id(1L)
+                .language(Language.JAVA)
+                .build();
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .build();
+        when(lessonRepository.findById(id)).thenReturn(Optional.of(new Lesson()));
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> lessonService.update(id, lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdate_LanguageMismatchException() {
+        Long id = 1L;
+        Lesson lesson = Lesson.builder()
+                .dateTime(LocalDateTime.now().plusHours(1))
+                .build();
+        Student student = Student.builder()
+                .id(1L)
+                .language(Language.JAVA)
+                .build();
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .languages(Set.of(Language.KOTLIN))
+                .build();
+        when(lessonRepository.findById(id)).thenReturn(Optional.of(new Lesson()));
+        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(false);
+
+        assertThrows(LanguageMismatchException.class,
+                () -> lessonService.update(id, lesson, student.getId(), teacher.getId()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testChangeDateTime_DateInPast_LessonInPastException() {
+        Lesson lesson = Lesson.builder()
+                .id(1L)
+                .dateTime(LocalDateTime.now().minusDays(1))
+                .build();
+
+
+        assertThrows(LessonInPastException.class,
+                () -> lessonService.changeDateTime(lesson.getId(), lesson.getDateTime()));
+        verify(lessonRepository, never()).save(any());
+    }
+
+    @Test
+    void testChangeDateTime_TermUnavailable_LessonDateUnavailableException() {
+        Long id = 1L;
+        LocalDateTime dateTime = LocalDateTime.now().plusDays(1);
+        when(lessonRepository.findById(id)).thenReturn(Optional.of(new Lesson()));
+        when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(true);
+
+        assertThrows(LessonDateUnavailableException.class,
+                () -> lessonService.changeDateTime(id, dateTime));
+        verify(lessonRepository, never()).save(any());
     }
 
 
