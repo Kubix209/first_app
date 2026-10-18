@@ -7,6 +7,7 @@ import com.example.firstapp.teacher.model.Teacher;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,24 +18,29 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
 
+    @Transactional(readOnly = true)
     public List<Student> findAll() {
         return studentRepository.findAll();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         studentRepository.deleteById(id);
     }
 
+    @Transactional
     public void save(Student student, Long teacherId) {
         Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
         student.setTeacher(teacher);
         studentRepository.save(student);
     }
 
+    @Transactional(readOnly = true)
     public Student findById(Long id) {
         return studentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("student with Id " + id + " not found"));
     }
 
+    @Transactional
     public void changeTeacher(Long studentId, Long teacherId) {
 
         if (studentId == null || teacherId == null) {
@@ -58,7 +64,6 @@ public class StudentService {
         }
 
         student.setTeacher(teacher);
-        studentRepository.save(student);
     }
 
 

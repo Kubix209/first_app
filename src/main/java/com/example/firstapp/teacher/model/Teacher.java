@@ -28,6 +28,8 @@ public class Teacher {
     private Set<Language> languages;
     @OneToMany(mappedBy = "teacher", fetch = FetchType.EAGER)
     private Set<Student> students;
+    @Version
+    private Long version;
 
     @Override
     public String toString() {

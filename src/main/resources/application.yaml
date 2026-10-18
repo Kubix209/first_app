@@ -13,3 +13,7 @@ spring:
         format_sql: true
   application:
     name: firstApp
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
