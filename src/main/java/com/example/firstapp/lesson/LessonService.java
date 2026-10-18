@@ -11,6 +11,8 @@ import com.example.firstapp.teacher.model.Teacher;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,14 +25,17 @@ public class LessonService {
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
 
+    @Transactional(readOnly = true)
     public List<Lesson> findAll() {
         return lessonRepository.findAll();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         lessonRepository.deleteById(id);
     }
 
+    @Transactional
     public void save(Lesson lesson, Long studentId, Long teacherId) {
         if (lesson == null || lesson.getDateTime() == null || studentId == null || teacherId == null) {
             throw new IllegalArgumentException("Lesson data is missing");
@@ -68,10 +73,12 @@ public class LessonService {
         lessonRepository.save(lesson);
     }
 
+    @Transactional(readOnly = true)
     public Lesson findById(Long id) {
         return lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("lesson with Id " + id + " not found"));
     }
 
+    @Transactional
     public void update(Long id, Lesson lesson, Long studentId, Long teacherId) {
         if (id == null || lesson == null || lesson.getDateTime() == null || studentId == null || teacherId == null) {
             throw new IllegalArgumentException("Lesson data is missing");
@@ -105,9 +112,9 @@ public class LessonService {
         existingLesson.setDateTime(lesson.getDateTime());
         existingLesson.setStudent(student);
         existingLesson.setTeacher(teacher);
-        lessonRepository.save(existingLesson);
     }
 
+    @Transactional
     public void changeDateTime(Long id, LocalDateTime dateTime) {
         if (id == null || dateTime == null) {
             throw new IllegalArgumentException("Lesson id or date and time are missing");
@@ -117,7 +124,7 @@ public class LessonService {
             throw new LessonInPastException("Lesson cannot be scheduled in past");
         }
 
-        Lesson existingLesson = lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Lesson with id " + id + " not found"));
+        Lesson existingLesson = lessonRepository.findWithLockById(id).orElseThrow(() -> new EntityNotFoundException("Lesson with id " + id + " not found"));
 
         LocalDateTime from = dateTime.minusHours(1);
         LocalDateTime to = dateTime.plusHours(1);
@@ -126,7 +133,6 @@ public class LessonService {
         }
 
         existingLesson.setDateTime(dateTime);
-        lessonRepository.save(existingLesson);
     }
 
 }
