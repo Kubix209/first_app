@@ -1,4 +1,9 @@
-<form th:action="@{/teachers/{id}/edit(id=${teacher.id})}" method="post">
+<form xmlns:th="http://www.thymeleaf.org"
+      th:action="@{/teachers/{id}/edit(id=${teacher.id})}"
+      method="post">
+
+  <input type="hidden" name="version" th:value="${teacher.version}">
+
   <div class="form-group">
     <label for="firstName">Imię:</label>
     <input type="text" id="firstName" name="firstName"
