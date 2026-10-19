@@ -26,7 +26,7 @@ public class Teacher {
     @CollectionTable(name = "teacher_language")
     @Column(name = "language")
     private Set<Language> languages;
-    @OneToMany(mappedBy = "teacher", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY)
     private Set<Student> students;
     @Version
     private Long version;

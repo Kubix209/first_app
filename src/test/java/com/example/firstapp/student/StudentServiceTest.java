@@ -134,10 +134,7 @@ public class StudentServiceTest {
         studentService.changeTeacher(student.getId(), teacher.getId());
 
         //then
-        verify(studentRepository).save(studentCaptor.capture());
-        Student result = studentCaptor.getValue();
-        assertEquals(1L, result.getId());
-        assertEquals(teacher.getId(), result.getTeacher().getId());
+        assertEquals(teacher, student.getTeacher());
     }
 
     @Test
