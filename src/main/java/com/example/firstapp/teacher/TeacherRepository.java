@@ -13,8 +13,10 @@ import java.util.Optional;
 @Repository
 public interface TeacherRepository extends JpaRepository<Teacher, Long> {
 
-    List<Teacher> findAllByLanguagesContaining(Language language);
+    List<Teacher> findAllByLanguagesContainingAndDeletedFalse(Language language);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Teacher> findWithLockById(Long id);
+    Optional<Teacher> findWithLockByIdAndDeletedFalse(Long id);
+
+    List<Teacher> findAllByDeletedFalse();
 }

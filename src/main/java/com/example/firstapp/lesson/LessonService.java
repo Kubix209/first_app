@@ -51,7 +51,7 @@ public class LessonService {
         }
 
         Student student = studentRepository.findById(studentId).orElseThrow(() -> new EntityNotFoundException("student with Id " + studentId + " not found"));
-        Teacher teacher = teacherRepository.findWithLockById(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
 
         LocalDateTime from = lesson.getDateTime().minusHours(1);
         LocalDateTime to = lesson.getDateTime().plusHours(1);
@@ -92,7 +92,7 @@ public class LessonService {
         }
 
         Student student = studentRepository.findById(studentId).orElseThrow(() -> new EntityNotFoundException("student with Id " + studentId + " not found"));
-        Teacher teacher = teacherRepository.findWithLockById(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
 
         LocalDateTime from = lesson.getDateTime().minusHours(1);
         LocalDateTime to = lesson.getDateTime().plusHours(1);
@@ -131,7 +131,7 @@ public class LessonService {
             throw new IllegalStateException("Lesson has no assigned teacher");
         }
 
-        Teacher teacher = teacherRepository.findWithLockById(existingLesson.getTeacher().getId()).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + existingLesson.getTeacher().getId() + " not found"));
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(existingLesson.getTeacher().getId()).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + existingLesson.getTeacher().getId() + " not found"));
 
         LocalDateTime from = dateTime.minusHours(1);
         LocalDateTime to = dateTime.plusHours(1);

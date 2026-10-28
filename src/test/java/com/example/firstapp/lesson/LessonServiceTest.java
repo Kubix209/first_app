@@ -75,7 +75,7 @@ public class LessonServiceTest {
                 .dateTime(LocalDateTime.now().plusHours(1))
                 .build();
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(any(), any(), any())).thenReturn(false);
 
         //when
@@ -144,7 +144,7 @@ public class LessonServiceTest {
                 .build();
         when(lessonRepository.findWithLockById(existingLesson.getId())).thenReturn(Optional.of(existingLesson));
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(false);
 
         //when
@@ -174,7 +174,7 @@ public class LessonServiceTest {
         LocalDateTime dateTime = LocalDateTime.now().plusDays(1);
 
         when(lessonRepository.findWithLockById(existingLesson.getId())).thenReturn(Optional.of(existingLesson));
-        when(teacherRepository.findWithLockById(existingLesson.getTeacher().getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(existingLesson.getTeacher().getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(false);
 
         //when
@@ -252,7 +252,7 @@ public class LessonServiceTest {
                 .dateTime(LocalDateTime.now().plusHours(1))
                 .build();
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(any(), any(), any())).thenReturn(true);
 
         assertThrows(LessonDateUnavailableException.class,
@@ -275,7 +275,7 @@ public class LessonServiceTest {
                 .languages(Set.of(Language.JAVA))
                 .build();
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(any(), any(), any())).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,
@@ -299,7 +299,7 @@ public class LessonServiceTest {
                 .dateTime(LocalDateTime.now().plusHours(1))
                 .build();
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThan(any(), any(), any())).thenReturn(false);
 
         assertThrows(LanguageMismatchException.class,
@@ -350,7 +350,7 @@ public class LessonServiceTest {
                 .build();
         when(lessonRepository.findWithLockById(id)).thenReturn(Optional.of(new Lesson()));
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(true);
 
         assertThrows(LessonDateUnavailableException.class,
@@ -372,7 +372,7 @@ public class LessonServiceTest {
                 .build();
         when(lessonRepository.findWithLockById(id)).thenReturn(Optional.of(new Lesson()));
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,
@@ -395,7 +395,7 @@ public class LessonServiceTest {
                 .build();
         when(lessonRepository.findWithLockById(id)).thenReturn(Optional.of(new Lesson()));
         when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findWithLockById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(false);
 
         assertThrows(LanguageMismatchException.class,
@@ -426,7 +426,7 @@ public class LessonServiceTest {
                 .dateTime(LocalDateTime.now().plusDays(1))
                 .build();
         when(lessonRepository.findWithLockById(lesson.getId())).thenReturn(Optional.of(lesson));
-        when(teacherRepository.findWithLockById(lesson.getTeacher().getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(lesson.getTeacher().getId())).thenReturn(Optional.of(teacher));
         when(lessonRepository.existsByTeacherAndDateTimeGreaterThanAndDateTimeLessThanAndIdNot(any(), any(), any(), any())).thenReturn(true);
 
         assertThrows(LessonDateUnavailableException.class,

@@ -27,6 +27,7 @@ public class Student {
     private Teacher teacher;
     @OneToMany(mappedBy = "student")
     private Set<Lesson> lessons;
+    private boolean deleted;
 
     @Override
     public String toString() {

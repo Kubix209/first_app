@@ -15,8 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +35,7 @@ public class TeacherServiceTest {
 
         //given
         List<Teacher> teachers = List.of(new Teacher(), new Teacher());
-        when(teacherRepository.findAll()).thenReturn(teachers);
+        when(teacherRepository.findAllByDeletedFalse()).thenReturn(teachers);
 
         //when
         List<Teacher> result = teacherService.findAll();
@@ -44,20 +43,24 @@ public class TeacherServiceTest {
         //then
         assertEquals(2, result.size());
         assertEquals(teachers, result);
-        verify(teacherRepository).findAll();
+        verify(teacherRepository).findAllByDeletedFalse();
     }
 
     @Test
     void testDeleteById_HappyPath_ResultsInTeacherBeingDeleted() {
 
         //given
-        Long id = 1L;
+        Teacher teacher = Teacher.builder()
+                .id(1L)
+                .deleted(false)
+                .build();
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
 
         //when
-        teacherService.deleteById(id);
+        teacherService.deleteById(teacher.getId());
 
         //then
-        verify(teacherRepository).deleteById(id);
+        assertTrue(teacher.isDeleted());
     }
 
     @Test
@@ -82,14 +85,14 @@ public class TeacherServiceTest {
         Teacher teacher = Teacher.builder()
                 .id(1L)
                 .build();
-        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
 
         //when
         Teacher result = teacherService.findById(teacher.getId());
 
         //then
         assertEquals(teacher, result);
-        verify(teacherRepository).findById(teacher.getId());
+        verify(teacherRepository).findWithLockByIdAndDeletedFalse(teacher.getId());
     }
 
     @Test
@@ -101,7 +104,7 @@ public class TeacherServiceTest {
                 .firstName("xd")
                 .lastName("xdd")
                 .build();
-        when(teacherRepository.findAllByLanguagesContaining(Language.JAVA)).thenReturn(List.of(teacher));
+        when(teacherRepository.findAllByLanguagesContainingAndDeletedFalse(Language.JAVA)).thenReturn(List.of(teacher));
 
         //when
         List<TeacherDto> teacherDtos = teacherService.findAllByLanguage(Language.JAVA);
@@ -112,16 +115,16 @@ public class TeacherServiceTest {
         assertEquals(teacher.getId(), result.id());
         assertEquals(teacher.getFirstName(), result.firstName());
         assertEquals(teacher.getLastName(), result.lastName());
-        verify(teacherRepository).findAllByLanguagesContaining(Language.JAVA);
+        verify(teacherRepository).findAllByLanguagesContainingAndDeletedFalse(Language.JAVA);
     }
 
     @Test
     void testFindById_TeacherNotFound_EntityNotFoundException() {
         Long id = 1L;
-        when(teacherRepository.findById(id)).thenReturn(Optional.empty());
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(id)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
                 () -> teacherService.findById(id));
-        verify(teacherRepository).findById(id);
+        verify(teacherRepository).findWithLockByIdAndDeletedFalse(id);
     }
 }

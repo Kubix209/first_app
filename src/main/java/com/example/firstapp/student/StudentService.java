@@ -20,24 +20,25 @@ public class StudentService {
 
     @Transactional(readOnly = true)
     public List<Student> findAll() {
-        return studentRepository.findAll();
+        return studentRepository.findAllByDeletedFalse();
     }
 
     @Transactional
     public void deleteById(Long id) {
-        studentRepository.deleteById(id);
+        Student student = findById(id);
+        student.setDeleted(true);
     }
 
     @Transactional
     public void save(Student student, Long teacherId) {
-        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
         student.setTeacher(teacher);
         studentRepository.save(student);
     }
 
     @Transactional(readOnly = true)
     public Student findById(Long id) {
-        return studentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("student with Id " + id + " not found"));
+        return studentRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new EntityNotFoundException("student with Id " + id + " not found"));
     }
 
     @Transactional
@@ -47,8 +48,8 @@ public class StudentService {
             throw new IllegalArgumentException("Student id or teacher id are missing");
         }
 
-        Student student = studentRepository.findById(studentId).orElseThrow(() -> new EntityNotFoundException("student with Id " + studentId + " not found"));
-        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
+        Student student = studentRepository.findByIdAndDeletedFalse(studentId).orElseThrow(() -> new EntityNotFoundException("student with Id " + studentId + " not found"));
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
 
         if (student.getLanguage() == null || teacher.getLanguages() == null) {
             throw new IllegalArgumentException("Student language or teacher languages are missing");
