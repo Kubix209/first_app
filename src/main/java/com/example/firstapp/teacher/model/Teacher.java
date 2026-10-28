@@ -30,6 +30,7 @@ public class Teacher {
     private Set<Student> students;
     @Version
     private Long version;
+    private boolean deleted;
 
     @Override
     public String toString() {

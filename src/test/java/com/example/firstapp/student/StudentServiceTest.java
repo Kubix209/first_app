@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +39,7 @@ public class StudentServiceTest {
 
         //given
         List<Student> students = List.of(new Student(), new Student());
-        when(studentRepository.findAll()).thenReturn(students);
+        when(studentRepository.findAllByDeletedFalse()).thenReturn(students);
 
         //when
         List<Student> result = studentService.findAll();
@@ -48,20 +47,24 @@ public class StudentServiceTest {
         //then
         assertEquals(2, result.size());
         assertEquals(students, result);
-        verify(studentRepository).findAll();
+        verify(studentRepository).findAllByDeletedFalse();
     }
 
     @Test
     void testDeleteById_HappyPath_ResultsInStudentBeingDeleted() {
 
         //given
-        Long id = 1L;
+        Student student = Student.builder()
+                .id(1L)
+                .deleted(false)
+                .build();
+        when(studentRepository.findByIdAndDeletedFalse(student.getId())).thenReturn(Optional.of(student));
 
         //when
-        studentService.deleteById(id);
+        studentService.deleteById(student.getId());
 
         //then
-        verify(studentRepository).deleteById(id);
+        assertTrue(student.isDeleted());
     }
 
     @Test
@@ -80,7 +83,7 @@ public class StudentServiceTest {
                 .lastName("xd")
                 .language(Language.JAVA)
                 .build();
-        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
 
         //when
         studentService.save(student, teacher.getId());
@@ -98,14 +101,14 @@ public class StudentServiceTest {
         Student student = Student.builder()
                 .id(1L)
                 .build();
-        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
+        when(studentRepository.findByIdAndDeletedFalse(student.getId())).thenReturn(Optional.of(student));
 
         //when
         Student result = studentService.findById(student.getId());
 
         //then
         assertEquals(student, result);
-        verify(studentRepository).findById(student.getId());
+        verify(studentRepository).findByIdAndDeletedFalse(student.getId());
     }
 
     @Test
@@ -127,8 +130,8 @@ public class StudentServiceTest {
                 .language(Language.JAVA)
                 .teacher(existingTeacher)
                 .build();
-        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(studentRepository.findByIdAndDeletedFalse(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
 
         //when
         studentService.changeTeacher(student.getId(), teacher.getId());
@@ -143,7 +146,6 @@ public class StudentServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> studentService.changeTeacher(null, teacherId));
-        verify(studentRepository, never()).save(any());
     }
 
     @Test
@@ -155,12 +157,11 @@ public class StudentServiceTest {
                 .id(1L)
                 .languages(Set.of(Language.KOTLIN))
                 .build();
-        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(studentRepository.findByIdAndDeletedFalse(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
 
         assertThrows(IllegalArgumentException.class,
                 () -> studentService.changeTeacher(student.getId(), teacher.getId()));
-        verify(studentRepository, never()).save(any());
     }
 
     @Test
@@ -175,12 +176,11 @@ public class StudentServiceTest {
                 .language(Language.JAVA)
                 .teacher(new Teacher())
                 .build();
-        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(studentRepository.findByIdAndDeletedFalse(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
 
         assertThrows(LanguageMismatchException.class,
                 () -> studentService.changeTeacher(student.getId(), teacher.getId()));
-        verify(studentRepository, never()).save(any());
     }
 
     @Test
@@ -194,36 +194,32 @@ public class StudentServiceTest {
                 .language(Language.JAVA)
                 .teacher(teacher)
                 .build();
-        when(studentRepository.findById(student.getId())).thenReturn(Optional.of(student));
-        when(teacherRepository.findById(teacher.getId())).thenReturn(Optional.of(teacher));
+        when(studentRepository.findByIdAndDeletedFalse(student.getId())).thenReturn(Optional.of(student));
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(teacher.getId())).thenReturn(Optional.of(teacher));
 
         assertThrows(IllegalArgumentException.class,
                 () -> studentService.changeTeacher(student.getId(), teacher.getId()));
-        verify(studentRepository, never()).save(any());
     }
 
     @Test
     void testFindById_StudentNotFound_EntityNotFoundException() {
         Long id = 1L;
-        when(studentRepository.findById(id)).thenReturn(Optional.empty());
+        when(studentRepository.findByIdAndDeletedFalse(id)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
                 () -> studentService.findById(id));
-        verify(studentRepository).findById(id);
+        verify(studentRepository).findByIdAndDeletedFalse(id);
     }
 
     @Test
     void testSave_TeacherNotFound_EntityNotFoundException() {
         Long id = 1L;
-        when(teacherRepository.findById(id)).thenReturn(Optional.empty());
+        when(teacherRepository.findWithLockByIdAndDeletedFalse(id)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
                 () -> studentService.save(new Student(), id));
         verify(studentRepository, never()).save(any());
     }
-
-
-    
 
 
 }

@@ -18,12 +18,13 @@ public class TeacherService {
 
     @Transactional(readOnly = true)
     public List<Teacher> findAll() {
-        return teacherRepository.findAll();
+        return teacherRepository.findAllByDeletedFalse();
     }
 
     @Transactional
     public void deleteById(Long id) {
-        teacherRepository.deleteById(id);
+        Teacher teacher = findById(id);
+        teacher.setDeleted(true);
     }
 
     @Transactional
@@ -33,12 +34,12 @@ public class TeacherService {
 
     @Transactional(readOnly = true)
     public Teacher findById(Long id) {
-        return teacherRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + id + " not found"));
+        return teacherRepository.findWithLockByIdAndDeletedFalse(id).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + id + " not found"));
     }
 
     @Transactional(readOnly = true)
     public List<TeacherDto> findAllByLanguage(Language language) {
-      return teacherRepository.findAllByLanguagesContaining(language).stream()
+      return teacherRepository.findAllByLanguagesContainingAndDeletedFalse(language).stream()
                 .map(teacher -> new TeacherDto(
                         teacher.getId(),
                         teacher.getFirstName(),
