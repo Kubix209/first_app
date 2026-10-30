@@ -1,16 +1,16 @@
 package com.example.firstapp.teacher;
 
 import com.example.firstapp.common.Language;
+import com.example.firstapp.teacher.dto.CreateTeacherCommand;
 import com.example.firstapp.teacher.dto.TeacherDto;
 import com.example.firstapp.teacher.model.Teacher;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/teachers")
 @RequiredArgsConstructor
 public class TeacherController {
@@ -18,27 +18,18 @@ public class TeacherController {
     private final TeacherService teacherService;
 
     @GetMapping
-    public String findAll(Model model) {
-        model.addAttribute("teachers", teacherService.findAll());
-        return "teachers/list";
+    public List<TeacherDto> findAll() {
+        return teacherService.findAll();
     }
 
     @DeleteMapping("/{id}")
-    @ResponseBody
     public void deleteById(@PathVariable Long id) {
         teacherService.deleteById(id);
     }
 
-    @GetMapping("/create")
-    public String createForm(Model model) {
-        model.addAttribute("languages", Language.values());
-        return "teachers/register";
-    }
-
-    @PostMapping("/create")
-    public String save(Teacher teacher) {
-        teacherService.save(teacher);
-        return "redirect:/teachers";
+    @PostMapping
+    public TeacherDto save(CreateTeacherCommand command) {
+        return teacherService.save(command);
     }
 
     @GetMapping("/{id}/edit")

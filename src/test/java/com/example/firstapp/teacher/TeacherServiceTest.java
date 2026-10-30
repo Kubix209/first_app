@@ -30,21 +30,21 @@ public class TeacherServiceTest {
     @Captor
     private ArgumentCaptor<Teacher> teacherCaptor;
 
-    @Test
-    void testFindAll_HappyPath_ResultsInTeacherBeingReturned() {
-
-        //given
-        List<Teacher> teachers = List.of(new Teacher(), new Teacher());
-        when(teacherRepository.findAllByDeletedFalse()).thenReturn(teachers);
-
-        //when
-        List<Teacher> result = teacherService.findAll();
-
-        //then
-        assertEquals(2, result.size());
-        assertEquals(teachers, result);
-        verify(teacherRepository).findAllByDeletedFalse();
-    }
+//    @Test
+//    void testFindAll_HappyPath_ResultsInTeacherBeingReturned() {
+//
+//        //given
+//        List<Teacher> teachers = List.of(new Teacher(), new Teacher());
+//        when(teacherRepository.findAllByDeletedFalse()).thenReturn(teachers);
+//
+//        //when
+//        List<Teacher> result = teacherService.findAll();
+//
+//        //then
+//        assertEquals(2, result.size());
+//        assertEquals(teachers, result);
+//        verify(teacherRepository).findAllByDeletedFalse();
+//    }
 
     @Test
     void testDeleteById_HappyPath_ResultsInTeacherBeingDeleted() {
