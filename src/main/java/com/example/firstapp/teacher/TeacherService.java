@@ -1,6 +1,7 @@
 package com.example.firstapp.teacher;
 
 import com.example.firstapp.common.Language;
+import com.example.firstapp.teacher.dto.CreateTeacherCommand;
 import com.example.firstapp.teacher.dto.TeacherDto;
 import com.example.firstapp.teacher.model.Teacher;
 import jakarta.persistence.EntityNotFoundException;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +19,10 @@ public class TeacherService {
     private final TeacherRepository teacherRepository;
 
     @Transactional(readOnly = true)
-    public List<Teacher> findAll() {
-        return teacherRepository.findAllByDeletedFalse();
+    public List<TeacherDto> findAll() {
+        return teacherRepository.findAllByDeletedFalse().stream()
+                .map(TeacherDto::fromEntity)
+                .toList();
     }
 
     @Transactional
@@ -28,8 +32,13 @@ public class TeacherService {
     }
 
     @Transactional
-    public void save(Teacher teacher) {
-        teacherRepository.save(teacher);
+    public TeacherDto save(CreateTeacherCommand command) {
+        // metoda save w repo przyjhmuje teacher wiec musze zmapowac commanda na teacghera analogicznie do tego jak w dto to zrobilisnmy
+        // tylko w druga strona
+        // to przekazac do metody save jako argument
+        // i metoda save zwraca teahcera a my musimy zwrocic teacher dto
+        // wiec znowu musimy zmapowac na teacher dto
+        //dostosowac reszte teachera, calego studenta, cale lesson i wszystkie testy a jak to zrobie to sie zglos do bosa
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +52,8 @@ public class TeacherService {
                 .map(teacher -> new TeacherDto(
                         teacher.getId(),
                         teacher.getFirstName(),
-                        teacher.getLastName()
+                        teacher.getLastName(),
+                        Set.of(Language.JAVA)
                 ))
                 .toList();
     }
