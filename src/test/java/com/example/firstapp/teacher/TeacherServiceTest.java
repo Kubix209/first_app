@@ -79,7 +79,7 @@ public class TeacherServiceTest {
     }
 
     @Test
-    void testFindById_HappyPath_ResultsInTeacherBeingFound() {
+    void testFindEntityById_HappyPath_ResultsInTeacherBeingFound() {
 
         //given
         Teacher teacher = Teacher.builder()
@@ -119,7 +119,7 @@ public class TeacherServiceTest {
     }
 
     @Test
-    void testFindById_TeacherNotFound_EntityNotFoundException() {
+    void testFindEntityById_TeacherNotFound_EntityNotFoundException() {
         Long id = 1L;
         when(teacherRepository.findWithLockByIdAndDeletedFalse(id)).thenReturn(Optional.empty());
 
