@@ -19,5 +19,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Teacher> findWithLockByIdAndDeletedFalse(Long id);
 
+    Optional<Teacher> findByIdAndDeletedFalse(Long id);
+
     List<Teacher> findAllByDeletedFalse();
 }
