@@ -2,9 +2,11 @@ package com.example.firstapp.teacher.dto;
 
 import com.example.firstapp.common.Language;
 import com.example.firstapp.teacher.model.Teacher;
+import lombok.Builder;
 
 import java.util.Set;
 
+@Builder
 public record UpdateTeacherCommand(
 
         String firstName,

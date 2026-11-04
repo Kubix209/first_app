@@ -13,6 +13,7 @@ public record TeacherDto(
         String lastName,
         Set<Language> languages
 ) {
+
     public static TeacherDto fromEntity(Teacher teacher) {
         return TeacherDto.builder()
                 .id(teacher.getId())
@@ -21,4 +22,5 @@ public record TeacherDto(
                 .languages(teacher.getLanguages())
                 .build();
     }
+
 }
