@@ -27,7 +27,7 @@ public class TeacherController {
     }
 
     @PostMapping
-    public TeacherDto save(CreateTeacherCommand command) {
+    public TeacherDto save(@RequestBody CreateTeacherCommand command) {
         return teacherService.save(command);
     }
 

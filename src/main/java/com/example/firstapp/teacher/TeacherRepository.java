@@ -1,7 +1,6 @@
 package com.example.firstapp.teacher;
 
 import com.example.firstapp.common.Language;
-import com.example.firstapp.teacher.dto.TeacherDto;
 import com.example.firstapp.teacher.model.Teacher;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,8 +17,6 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Teacher> findWithLockByIdAndDeletedFalse(Long id);
-
-    Optional<Teacher> findByIdAndDeletedFalse(Long id);
 
     List<Teacher> findAllByDeletedFalse();
 }

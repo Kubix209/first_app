@@ -9,8 +9,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import java.util.List;
 
 @Service
@@ -19,10 +17,8 @@ public class TeacherService {
 
     private final TeacherRepository teacherRepository;
 
-    @Transactional(readOnly = true)
-    public TeacherDto findById(Long id) {
-        Teacher teacher = teacherRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + id + " not found"));
-        return TeacherDto.fromEntity(teacher);
+    private Teacher findById(Long id) {
+        return teacherRepository.findWithLockByIdAndDeletedFalse(id).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + id + " not found"));
     }
 
     @Transactional(readOnly = true)
@@ -34,7 +30,7 @@ public class TeacherService {
 
     @Transactional
     public void deleteById(Long id) {
-        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(id).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + id + " not found"));
+        Teacher teacher = findById(id);
         teacher.setDeleted(true);
     }
 
@@ -47,7 +43,7 @@ public class TeacherService {
 
     @Transactional
     public TeacherDto update(UpdateTeacherCommand command, Long id) {
-        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(id).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + id + " not found"));
+        Teacher teacher = findById(id);
         Teacher updatedTeacher = UpdateTeacherCommand.updateEntity(command, teacher);
         return TeacherDto.fromEntity(updatedTeacher);
     }
