@@ -6,11 +6,8 @@ import java.time.LocalDateTime;
 
 @Builder
 public record UpdateLessonCommand(
-
         Long teacherId,
         Long studentId,
         LocalDateTime dateTime
-
 ) {
-
 }

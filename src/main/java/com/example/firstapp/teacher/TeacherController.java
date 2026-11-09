@@ -4,7 +4,9 @@ import com.example.firstapp.common.Language;
 import com.example.firstapp.teacher.dto.CreateTeacherCommand;
 import com.example.firstapp.teacher.dto.TeacherDto;
 import com.example.firstapp.teacher.dto.UpdateTeacherCommand;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +29,8 @@ public class TeacherController {
     }
 
     @PostMapping
-    public TeacherDto save(@RequestBody CreateTeacherCommand command) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public TeacherDto save(@Valid @RequestBody CreateTeacherCommand command) {
         return teacherService.save(command);
     }
 
