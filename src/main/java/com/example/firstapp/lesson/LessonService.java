@@ -32,7 +32,8 @@ public class LessonService {
 
     @Transactional(readOnly = true)
     public Lesson findById(Long id) {
-        return lessonRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("lesson with Id " + id + " not found"));
+        return lessonRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("lesson with Id " + id + " not found"));
     }
 
     @Transactional(readOnly = true)
@@ -49,8 +50,11 @@ public class LessonService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public LessonDto save(CreateLessonCommand command) {
-        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(command.teacherId()).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + command.teacherId() + " not found"));
-        Student student = studentRepository.findByIdAndDeletedFalse(command.studentId()).orElseThrow(() -> new EntityNotFoundException("student with Id " + command.studentId() + " not found"));
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(command.teacherId()).orElseThrow(() ->
+                new EntityNotFoundException("teacher with Id " + command.teacherId() + " not found"));
+
+        Student student = studentRepository.findByIdAndDeletedFalse(command.studentId()).orElseThrow(() ->
+                new EntityNotFoundException("student with Id " + command.studentId() + " not found"));
         Lesson lesson = CreateLessonCommand.toEntity(command, teacher, student);
 
         if (lesson.getDateTime() == null) {
@@ -85,12 +89,12 @@ public class LessonService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public LessonDto update(Long id, UpdateLessonCommand command) {
-
         if (command.teacherId() == null && command.studentId() == null && command.dateTime() == null) {
             throw new IllegalArgumentException("No fields provided for lesson update");
         }
 
-        Lesson lesson = lessonRepository.findWithLockById(id).orElseThrow(() -> new EntityNotFoundException("lesson with Id " + id + " not found"));
+        Lesson lesson = lessonRepository.findWithLockById(id).orElseThrow(() ->
+                new EntityNotFoundException("lesson with Id " + id + " not found"));
 
         Long teacherId;
         if (command.teacherId() != null) {
@@ -98,7 +102,8 @@ public class LessonService {
         } else {
             teacherId = lesson.getTeacher().getId();
         }
-        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(teacherId).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(teacherId).orElseThrow(() ->
+                new EntityNotFoundException("teacher with Id " + teacherId + " not found"));
 
         Long studentId;
         if (command.studentId() != null) {
@@ -106,7 +111,8 @@ public class LessonService {
         } else {
             studentId = lesson.getStudent().getId();
         }
-        Student student = studentRepository.findByIdAndDeletedFalse(studentId).orElseThrow(() -> new EntityNotFoundException("student with Id " + studentId + " not found"));
+        Student student = studentRepository.findByIdAndDeletedFalse(studentId).orElseThrow(() ->
+                new EntityNotFoundException("student with Id " + studentId + " not found"));
 
         LocalDateTime dateTime;
         if (command.dateTime() != null) {
@@ -144,8 +150,6 @@ public class LessonService {
         lesson.setTeacher(teacher);
         lesson.setStudent(student);
         lesson.setDateTime(dateTime);
-
         return LessonDto.fromEntity(lesson);
     }
-
 }

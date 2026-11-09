@@ -5,12 +5,11 @@ import com.example.firstapp.student.dto.CreateStudentCommand;
 import com.example.firstapp.student.dto.StudentDto;
 import com.example.firstapp.student.dto.UpdateStudentCommand;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/students")
 @RequiredArgsConstructor
 public class StudentController {

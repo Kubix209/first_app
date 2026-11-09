@@ -4,12 +4,11 @@ import com.example.firstapp.lesson.dto.CreateLessonCommand;
 import com.example.firstapp.lesson.dto.LessonDto;
 import com.example.firstapp.lesson.dto.UpdateLessonCommand;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/lessons")
 @RequiredArgsConstructor
 public class LessonController {
