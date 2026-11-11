@@ -14,9 +14,11 @@ public record CreateTeacherCommand(
         @NotNull(message = "NULL_VALUE")
         @Pattern(regexp = "[A-Z][a-z]{0,18}", message = "PATTERN_MISMATCH")
         String firstName,
+        @NotNull(message = "NULL_VALUE")
+        @Pattern(regexp = "[A-Z][a-z]{0,18}", message = "PATTERN_MISMATCH")
         String lastName,
         @NotEmpty(message = "EMPTY_VALUE")
-        Set<Language> languages
+        Set<@NotNull(message = "NULL_VALUE") Language> languages
 ) {
     public static Teacher toEntity(CreateTeacherCommand command) {
         return Teacher.builder()

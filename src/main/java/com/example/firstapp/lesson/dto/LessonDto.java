@@ -6,14 +6,11 @@ import java.time.LocalDateTime;
 
 @Builder
 public record LessonDto(
-
         Long id,
         Long teacherId,
         Long studentId,
         LocalDateTime dateTime
-
 ) {
-
     public static LessonDto fromEntity(Lesson lesson) {
         return LessonDto.builder()
                 .id(lesson.getId())
@@ -22,5 +19,4 @@ public record LessonDto(
                 .dateTime(lesson.getDateTime())
                 .build();
     }
-
 }
