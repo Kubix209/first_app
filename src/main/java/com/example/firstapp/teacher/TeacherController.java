@@ -19,11 +19,13 @@ public class TeacherController {
     private final TeacherService teacherService;
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<TeacherDto> findAll() {
         return teacherService.findAll();
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Long id) {
         teacherService.deleteById(id);
     }
@@ -35,13 +37,14 @@ public class TeacherController {
     }
 
     @PatchMapping("/{id}")
-    public TeacherDto update(@PathVariable Long id, @RequestBody UpdateTeacherCommand command) {
+    @ResponseStatus(HttpStatus.OK)
+    public TeacherDto update(@Valid @RequestBody UpdateTeacherCommand command,@PathVariable Long id) {
         return teacherService.update(command, id);
     }
 
     @GetMapping(params = "language")
+    @ResponseStatus(HttpStatus.OK)
     public List<TeacherDto> findByLanguage(@RequestParam Language language) {
         return teacherService.findAllByLanguage(language);
     }
-
 }

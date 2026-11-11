@@ -11,7 +11,6 @@ public record StudentDto(
         String lastName,
         Language language
 ) {
-
     public static StudentDto fromEntity(Student student) {
         return StudentDto.builder()
                 .id(student.getId())
@@ -20,5 +19,4 @@ public record StudentDto(
                 .language(student.getLanguage())
                 .build();
     }
-
 }
