@@ -1,5 +1,6 @@
 package com.example.firstapp.student;
 
+import com.example.firstapp.common.exception.IncompleteEntityDataException;
 import com.example.firstapp.common.exception.LanguageMismatchException;
 import com.example.firstapp.student.dto.ChangeStudentTeacherCommand;
 import com.example.firstapp.student.dto.CreateStudentCommand;
@@ -45,8 +46,8 @@ public class StudentService {
         Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(command.teacherId()).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + command.teacherId() + " not found"));
         Student student = CreateStudentCommand.toEntity(command, teacher);
 
-        if (student.getLanguage() == null || teacher.getLanguages() == null) {
-            throw new IllegalArgumentException("Student language or teacher languages are missing");
+        if (teacher.getLanguages() == null || teacher.getLanguages().isEmpty()) {
+            throw new IncompleteEntityDataException("Teacher languages are missing");
         }
 
         if (!teacher.getLanguages().contains(student.getLanguage())) {
@@ -60,17 +61,27 @@ public class StudentService {
 
     @Transactional
     public StudentDto update(Long id, UpdateStudentCommand command) {
-
         Student student = findById(id);
         Student updatedStudent = UpdateStudentCommand.updateEntity(command, student);
 
-        if (student.getLanguage() == null || student.getTeacher().getLanguages() == null) {
-            throw new IllegalArgumentException("Student language or teacher languages are missing");
+        if (student.getLanguage() == null) {
+            throw new IncompleteEntityDataException("Student language is missing");
+        }
+
+        if (student.getTeacher() == null) {
+            throw new IncompleteEntityDataException("Student has no assigned teacher");
+        }
+
+        if (student.getTeacher().getLanguages() == null || student.getTeacher().getLanguages().isEmpty()) {
+            throw new IncompleteEntityDataException("Assigned teacher languages are missing");
         }
 
         if (!student.getTeacher().getLanguages().contains(student.getLanguage())) {
-            throw new LanguageMismatchException("Teacher " + student.getTeacher().getFirstName() + " " + student.getTeacher().getLastName()
-                    + " does not teach " + student.getLanguage());
+            throw new LanguageMismatchException(
+                    "Teacher " + student.getTeacher().getFirstName() + " "
+                    + student.getTeacher().getLastName()
+                    + " does not teach " + student.getLanguage()
+            );
         }
 
         return StudentDto.fromEntity(updatedStudent);
@@ -78,16 +89,16 @@ public class StudentService {
 
     @Transactional
     public StudentDto changeTeacher(Long id, ChangeStudentTeacherCommand command) {
+        Student student = findById(id);
+        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(command.teacherId()).orElseThrow(() ->
+                new EntityNotFoundException("teacher with Id " + command.teacherId() + " not found"));
 
-        if (id == null || command.teacherId() == null) {
-            throw new IllegalArgumentException("Student id or teacher id are missing");
+        if (student.getLanguage() == null) {
+            throw new IncompleteEntityDataException("Student language must be provided before changing teacher");
         }
 
-        Student student = findById(id);
-        Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(command.teacherId()).orElseThrow(() -> new EntityNotFoundException("teacher with Id " + command.teacherId() + " not found"));
-
-        if (student.getLanguage() == null || teacher.getLanguages() == null) {
-            throw new IllegalArgumentException("Student language or teacher languages are missing");
+        if (teacher.getLanguages() == null) {
+            throw new IncompleteEntityDataException("Teacher languages must be provided before assigning teacher");
         }
 
         if (!teacher.getLanguages().contains(student.getLanguage())) {
@@ -98,6 +109,4 @@ public class StudentService {
         student.setTeacher(teacher);
         return StudentDto.fromEntity(student);
     }
-
-
 }

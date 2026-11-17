@@ -1,9 +1,6 @@
 package com.example.firstapp.lesson;
 
-import com.example.firstapp.common.exception.LanguageMismatchException;
-import com.example.firstapp.common.exception.LessonDateUnavailableException;
-import com.example.firstapp.common.exception.LessonInPastException;
-import com.example.firstapp.common.exception.TeacherNotAssignedToStudentException;
+import com.example.firstapp.common.exception.*;
 import com.example.firstapp.lesson.dto.CreateLessonCommand;
 import com.example.firstapp.lesson.dto.LessonDto;
 import com.example.firstapp.lesson.dto.UpdateLessonCommand;
@@ -55,11 +52,8 @@ public class LessonService {
 
         Student student = studentRepository.findByIdAndDeletedFalse(command.studentId()).orElseThrow(() ->
                 new EntityNotFoundException("student with Id " + command.studentId() + " not found"));
-        Lesson lesson = CreateLessonCommand.toEntity(command, teacher, student);
 
-        if (lesson.getDateTime() == null) {
-            throw new IllegalArgumentException("Lesson data is missing");
-        }
+        Lesson lesson = CreateLessonCommand.toEntity(command, teacher, student);
 
         if (lesson.getDateTime().isBefore(LocalDateTime.now())) {
             throw new LessonInPastException("Lesson cannot be scheduled in past");
@@ -75,8 +69,12 @@ public class LessonService {
             throw new TeacherNotAssignedToStudentException("Teacher with id " + teacher.getId() + " is not assigned to student with id " + student.getId());
         }
 
-        if (student.getLanguage() == null || teacher.getLanguages() == null) {
-            throw new IllegalArgumentException("Student language or teacher languages are missing");
+        if (student.getLanguage() == null) {
+            throw new IncompleteEntityDataException("Student language is missing");
+        }
+
+        if (teacher.getLanguages() == null || teacher.getLanguages().isEmpty()) {
+            throw new IncompleteEntityDataException("Teacher languages are missing");
         }
 
         if (!teacher.getLanguages().contains(student.getLanguage())) {
@@ -90,7 +88,7 @@ public class LessonService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public LessonDto update(Long id, UpdateLessonCommand command) {
         if (command.teacherId() == null && command.studentId() == null && command.dateTime() == null) {
-            throw new IllegalArgumentException("No fields provided for lesson update");
+            throw new EmptyUpdateException("No fields provided for lesson update");
         }
 
         Lesson lesson = lessonRepository.findWithLockById(id).orElseThrow(() ->
@@ -100,6 +98,10 @@ public class LessonService {
         if (command.teacherId() != null) {
             teacherId = command.teacherId();
         } else {
+            if (lesson.getTeacher() == null) {
+                throw new IncompleteEntityDataException("Lesson teacher is missing");
+            }
+
             teacherId = lesson.getTeacher().getId();
         }
         Teacher teacher = teacherRepository.findWithLockByIdAndDeletedFalse(teacherId).orElseThrow(() ->
@@ -109,6 +111,10 @@ public class LessonService {
         if (command.studentId() != null) {
             studentId = command.studentId();
         } else {
+            if (lesson.getStudent() == null) {
+                throw new IncompleteEntityDataException("Lesson student is missing");
+            }
+
             studentId = lesson.getStudent().getId();
         }
         Student student = studentRepository.findByIdAndDeletedFalse(studentId).orElseThrow(() ->
@@ -125,8 +131,12 @@ public class LessonService {
             throw new TeacherNotAssignedToStudentException("Teacher with id " + teacher.getId() + " is not assigned to student with id " + student.getId());
         }
 
-        if (student.getLanguage() == null || teacher.getLanguages() == null) {
-            throw new IllegalArgumentException("Student language or teacher languages are missing");
+        if (student.getLanguage() == null) {
+            throw new IncompleteEntityDataException("Student language is missing");
+        }
+
+        if (teacher.getLanguages() == null || teacher.getLanguages().isEmpty()) {
+            throw new IncompleteEntityDataException("Teacher languages are missing");
         }
 
         if (!teacher.getLanguages().contains(student.getLanguage())) {
@@ -134,7 +144,7 @@ public class LessonService {
         }
 
         if (dateTime == null) {
-            throw new IllegalArgumentException("Lesson data is missing");
+            throw new IncompleteEntityDataException("Lesson date is missing");
         }
 
         if (dateTime.isBefore(LocalDateTime.now())) {

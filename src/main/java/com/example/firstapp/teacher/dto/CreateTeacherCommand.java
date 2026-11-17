@@ -33,14 +33,3 @@ public record CreateTeacherCommand(
 // i method reference i metody pomocnicze zrobic bezposrednio w encji (np. change first name) i jedna pomocnicza replace ktora bedzied kozystac z tamtych
 // bedzie sie to zachowywac jak optional wiec bede korzystal z  ifPresent na kazdym polu z commanda bede robil ifPresent i method reference
 // ewentualnei zrobic nowego commanda specjalnie pod to ktory bedize rekordem i tam bedzie ten json nullable i wtedy powinno byc bez ifow
-
-
-//zapamietaj ze dodanei walidacji upraszcza walidacje w serwisie
-
-//dopisz wszedzie odowiednie statusy
-
-//next lekcja global exception handler
-
-//testy integracyjne liznac troche teorii
-
-//z loga wyciagnac all ifno i za pomoca global exception handler spowodowac ze odpowiedz z bledem bad request w postmanie bedzie przekazywala informacje co sie stalo
