@@ -1,9 +1,7 @@
 package com.example.firstapp.lesson;
 
 import com.example.firstapp.common.Language;
-import com.example.firstapp.common.exception.LanguageMismatchException;
 import com.example.firstapp.common.exception.LessonDateUnavailableException;
-import com.example.firstapp.common.exception.LessonInPastException;
 import com.example.firstapp.common.exception.TeacherNotAssignedToStudentException;
 import com.example.firstapp.lesson.dto.CreateLessonCommand;
 import com.example.firstapp.lesson.dto.LessonDto;

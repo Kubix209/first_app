@@ -44,7 +44,7 @@ public class StudentController {
 
     @PutMapping("/{id}/teacher")
     @ResponseStatus(HttpStatus.OK)
-    public StudentDto changeTeacher(@Valid @PathVariable Long id, @RequestBody ChangeStudentTeacherCommand command) {
+    public StudentDto changeTeacher(@Valid @RequestBody ChangeStudentTeacherCommand command, @PathVariable Long id) {
         return studentService.changeTeacher(id, command);
     }
 }
